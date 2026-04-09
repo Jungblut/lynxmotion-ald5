@@ -15,13 +15,13 @@ class SSC32(object):
         self.serial.flush()
 
     def readline(self):
-        s = ""
+        buf = bytearray()
         while True:
             b = self.serial.read()
-            if b == '\r':
+            if b == b"\r":
                 break
-            s += b
-        return s
+            buf.extend(b)
+        return buf.decode("utf-8", errors="replace")
 
     def version(self):
         self.write("VER")
@@ -29,7 +29,7 @@ class SSC32(object):
 
     def move_done(self):
         self.write("Q")
-        return self.serial.read() == "."
+        return self.serial.read() == b"."
 
     def move(self, servo, pulse_width, speed=None, time=None):
         """Moves the given servo.

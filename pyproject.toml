@@ -8,3 +8,13 @@ dependencies = [
     "pyserial>=3.5",
     "pyyaml>=6.0.3",
 ]
+
+[dependency-groups]
+dev = [
+    "assertpy>=1.1",
+    "pytest>=9.0.3",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["al5d"]
+testpaths = ["tests"]
