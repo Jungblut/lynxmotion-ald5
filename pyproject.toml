@@ -18,3 +18,7 @@ dev = [
 [tool.pytest.ini_options]
 pythonpath = ["al5d"]
 testpaths = ["tests"]
+markers = [
+    "integration: requires SSC-32 / AL5D hardware and serial device",
+    "motion: integration test that moves servos (clear workspace first)",
+]
