@@ -2,14 +2,17 @@ import serial
 
 class SSC32(object):
     def __init__(self, serial_port):
-        self.serial = serial.Serial(serial_port, 115200)
+        self.serial = serial.Serial(serial_port, 9600)
         self.in_group = False
 
     def write(self, string):
         """Sends the given string to the SSC-32 controller.
 
         string: does not need to end with a \r character"""
-        self.serial.write(string + "\r")
+        fx = f"{string}\r"
+        print(fx)
+        self.serial.write(fx.encode("utf-8"))
+        self.serial.flush()
 
     def readline(self):
         s = ""
@@ -60,7 +63,7 @@ class SSC32(object):
 
     def __exit__(self, exc_type, exc_value, traceback):
         if exc_value:
-            raise exc_value, None, traceback
+            raise exc_value.with_traceback(traceback)
         self.in_group = False
         assert self.group, "Empty group"
         self.write(self.group)

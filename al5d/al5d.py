@@ -34,7 +34,7 @@ class AL5D(object):
         with self.ssc32.move_group():
             self.base(math.pi / 2)
             self.shoulder(0)
-            self.elbow(math.pi / 2)
+            self.elbow(0)
             self.wrist(0)
             self.wrist_rotate(0)
             self.gripper(50)
