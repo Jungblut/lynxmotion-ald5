@@ -1,6 +1,7 @@
 import ssc32
 import math
 import time
+from dataclasses import dataclass
 
 BASE = 0
 SHOULDER = 1
@@ -10,24 +11,29 @@ GRIPPER = 4
 WRIST_ROTATE = 5
 
 
-#Measured from bottom of base to servo center, in meters
-SHOULDER_HEIGHT = 0.06985
-#Measured from servo centers, in meters
-SHOULDER_ELBOW_LENGTH = 0.14605
+@dataclass(frozen=True)
+class Kinematics:
+    """Link geometry for Cartesian IK (meters).
 
-#Measured from servo centers, in meters
-#Longer arm
-#ELBOW_WRIST_LENGTH = 0.20955
-#Shorter arm)
-ELBOW_WRIST_LENGTH = 0.1143
+    shoulder_height: bottom of base to shoulder servo center.
+    shoulder_elbow_length, elbow_wrist_length: between adjacent servo centers.
+    wrist_endpoint_length: wrist servo center to gripper tip.
+    """
 
-#Measured from wrist servo center to tip of gripper
-WRIST_ENDPOINT_LENGTH = 0.100013
+    shoulder_height: float = 0.06985
+    shoulder_elbow_length: float = 0.14605
+    # Shorter arm; longer alternative often ~0.20955 m
+    elbow_wrist_length: float = 0.1143
+    wrist_endpoint_length: float = 0.100013
+
+
+DEFAULT_KINEMATICS = Kinematics()
 
 #XXX: All interpolation is specific to my arm
 class AL5D(object):
-    def __init__(self, serial_port='/dev/ttyUSB0'):
+    def __init__(self, serial_port='/dev/ttyUSB0', kinematics=None):
         self.ssc32 = ssc32.SSC32(serial_port)
+        self.kinematics = kinematics if kinematics is not None else DEFAULT_KINEMATICS
 
     def init(self):
         """Moves all servos to their initial position"""
@@ -44,20 +50,21 @@ class AL5D(object):
         with angle phi relative xy plane (positive is clockwise when 
         viewed looking down the wrist servo)"""
         
+        k = self.kinematics
         #Distance from center of base
         d = math.sqrt(x**2 + y**2)
         #Height above shoulder joint
-        z_prime = z - SHOULDER_HEIGHT
+        z_prime = z - k.shoulder_height
 
         #To implement 3-joint IK, we use the equation for 2-joint for the wrist,
         #since the endpoint position with angle, defines that.
 
         #Adjust d and z_prime to be the wrist position
-        d -= math.cos(phi)*WRIST_ENDPOINT_LENGTH
-        z_prime -= math.sin(phi)*WRIST_ENDPOINT_LENGTH
+        d -= math.cos(phi) * k.wrist_endpoint_length
+        z_prime -= math.sin(phi) * k.wrist_endpoint_length
 
-        l1 = SHOULDER_ELBOW_LENGTH
-        l2 = ELBOW_WRIST_LENGTH
+        l1 = k.shoulder_elbow_length
+        l2 = k.elbow_wrist_length
         #Compute the elbow angle
         numerator = d**2 + z_prime**2 - l1**2 - l2**2
         denominator = 2*l1*l2

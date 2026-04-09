@@ -20,6 +20,19 @@ def arm():
     return robot, mock_ssc32
 
 
+def test_default_kinematics():
+    assert al5d.Kinematics() == al5d.DEFAULT_KINEMATICS
+
+
+def test_custom_kinematics_passed_to_al5d():
+    custom = al5d.Kinematics(shoulder_height=0.05, elbow_wrist_length=0.2)
+    mock_ssc32 = MagicMock()
+    mock_ssc32.move_group.return_value = mock_ssc32
+    with patch("ssc32.SSC32", return_value=mock_ssc32):
+        robot = al5d.AL5D("/dev/null", kinematics=custom)
+    assert robot.kinematics is custom
+
+
 def test_base_maps_endpoints(arm):
     robot, ssc = arm
     robot.base(0)
