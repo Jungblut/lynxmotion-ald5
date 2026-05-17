@@ -10,7 +10,6 @@ class SSC32(object):
 
         string: does not need to end with a \r character"""
         fx = f"{string}\r"
-        print(fx)
         self.serial.write(fx.encode("utf-8"))
         self.serial.flush()
 
