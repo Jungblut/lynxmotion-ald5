@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 import pytest
 from assertpy import assert_that
 
-import ssc32
+from al5d import ssc32
 
 
 @pytest.fixture

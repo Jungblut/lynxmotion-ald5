@@ -1,4 +1,4 @@
-import ssc32
+from . import ssc32
 import math
 import time
 from dataclasses import dataclass

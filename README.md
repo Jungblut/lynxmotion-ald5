@@ -61,10 +61,50 @@ with board.move_group():
     board.move(0, 1500, speed=100)  # servo 0, pulse width, optional S/T
 ```
 
+LeRobot
+=======
+
+The `lerobot_robot_al5d` package adds a [LeRobot](https://huggingface.co/docs/lerobot) robot, so the arm works with
+`lerobot-teleoperate`, `lerobot-record` and friends. The plain driver stays usable without it: `import al5d` never
+imports lerobot, and `import lerobot_robot_al5d` needs the `lerobot` extra.
+
+```bash
+uv sync                      # development: includes lerobot
+pip install "lerobot_robot_al5d[lerobot]"   # elsewhere
+```
+
+lerobot finds the plugin by its installed distribution name (`lerobot_robot_*`), so the robot is available as soon as it is
+installed next to lerobot:
+
+```bash
+uv run lerobot-teleoperate --robot.type=lynxmotion_al5d --robot.port=/dev/ttyUSB0 ...
+```
+
+Or from Python:
+
+```python
+from lerobot_robot_al5d import LynxmotionAL5D, LynxmotionAL5DConfig
+
+robot = LynxmotionAL5D(LynxmotionAL5DConfig(port="/dev/ttyUSB0"))
+robot.connect()  # homes the arm first
+robot.send_action({"base.pos": 90.0, "elbow.pos": 30.0, "gripper.pos": 40.0})
+print(robot.get_observation())
+robot.disconnect()
+```
+
+- Actions and observations are `<joint>.pos` for `base`, `shoulder`, `elbow`, `wrist`, `wrist_rotate` and `gripper`. Joints are in
+  **degrees** using the driver's own conventions and ranges (see `al5d/al5d.py`); `gripper` is 0 (open) to 100 (closed).
+  Out-of-range actions are clipped, and `send_action` returns what was actually sent.
+- The SSC-32 drives hobby servos without feedback, so **observations are the last commanded target, not a measurement**.
+  `connect()` therefore homes the arm by default (`--robot.home_on_connect=false` to skip).
+- `--robot.speed` (default 500) is the SSC-32 speed in µs/s applied to every move; lower is slower.
+- No calibration is needed: pulse widths are mapped by fixed constants in the driver.
+
 Setup
 =====
 
-Install dependencies:
+Install dependencies (Python 3.12 is pinned in `.python-version`, because lerobot pins `numpy<2.3`, which has no Python 3.14
+wheels yet):
 
 ```bash
 uv sync
@@ -75,7 +115,7 @@ Find the serial device (often `/dev/ttyUSB0` on Linux). After connecting the SSC
 Sanity check with the bundled script (clears the workspace of obstacles first):
 
 ```bash
-uv run al5d/test.py
+uv run python -m al5d.test
 ```
 
 Notes

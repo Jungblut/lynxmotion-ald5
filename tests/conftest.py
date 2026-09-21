@@ -36,7 +36,7 @@ def integration_serial_port():
 
 @pytest.fixture
 def integration_ssc32(integration_serial_port):
-    import ssc32
+    from al5d import ssc32
 
     ctrl = ssc32.SSC32(integration_serial_port)
     try:
