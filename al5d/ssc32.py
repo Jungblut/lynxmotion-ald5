@@ -1,4 +1,8 @@
+import logging
+
 import serial
+
+logger = logging.getLogger(__name__)
 
 class SSC32(object):
     def __init__(self, serial_port):
@@ -10,6 +14,7 @@ class SSC32(object):
 
         string: does not need to end with a \r character"""
         fx = f"{string}\r"
+        logger.debug("tx: %r", fx)
         self.serial.write(fx.encode("utf-8"))
         self.serial.flush()
 

@@ -97,7 +97,8 @@ robot.disconnect()
   Out-of-range actions are clipped, and `send_action` returns what was actually sent.
 - The SSC-32 drives hobby servos without feedback, so **observations are the last commanded target, not a measurement**.
   `connect()` therefore homes the arm by default (`--robot.home_on_connect=false` to skip).
-- `--robot.speed` (default 500) is the SSC-32 speed in µs/s applied to every move; lower is slower.
+- `--robot.speed` (default 80, as in the integration tests) is the SSC-32 speed in µs/s applied to every move; lower is
+  slower, and 1000 is roughly 90°/s.
 - No calibration is needed: pulse widths are mapped by fixed constants in the driver.
 
 Setup

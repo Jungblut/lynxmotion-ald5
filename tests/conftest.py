@@ -54,3 +54,26 @@ def integration_arm(integration_serial_port):
         yield robot
     finally:
         robot.ssc32.serial.close()
+
+
+@pytest.fixture
+def integration_lerobot_al5d(integration_serial_port, tmp_path):
+    """Factory for LeRobot ``LynxmotionAL5D`` robots on the real serial port; disconnects them at teardown."""
+    pytest.importorskip("lerobot")
+    from lerobot_robot_al5d import LynxmotionAL5D, LynxmotionAL5DConfig
+
+    robots = []
+
+    def make(**config_overrides):
+        config = LynxmotionAL5DConfig(
+            port=integration_serial_port, calibration_dir=tmp_path, **config_overrides
+        )
+        robots.append(LynxmotionAL5D(config))
+        return robots[-1]
+
+    try:
+        yield make
+    finally:
+        for robot in robots:
+            if robot.is_connected:
+                robot.disconnect()
